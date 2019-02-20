@@ -29,6 +29,14 @@
     * Hello World!. Your authtoken is <>
     * This response is from microservice after validating the token with monolith
     * This approach can be used by async or cronJobs to communicate with microservice from outside the environment
+7. For internal communications between containers 
+    * In kubernetes environment we can use service mesh like Istio, which handles most concerns
+    * To demonstrate it here - assumed that services are directly speaking over services instead of global load balancer or reverse-proxy
+    * Run curl from inside the monolith container to microservice directly
+    * docker exec -it $(docker ps | grep monolith| awk '{print $1}') sh -c "curl -v -w '\n' http://microservice:3000/"
+    * replace the data within () with valid monolith docker container id - if you face any issues
+    * docker exec -it <monolithID> sh -c "curl -v -w '\n' http://microservice:3000/"
+    * The same approach can be used for all other internal communications.
 
 ## Solution Flow
 
@@ -40,7 +48,7 @@
 5. The Browser reuses the same cookie across the domain of .lcl.host 
 5. Can try other subdomains - http://asdf.lcl.host:5000/ or http://propeller.lcl.host:5000/ 
 
-### microservie 
+### microservice 
 1. There are 2 ways to access microservice - 1. Browser , 2. REST API 
 2. For Browser - 
     * browser must have a cookie by name session id, else nginx rejects it (401 unauthorized)
@@ -64,3 +72,16 @@
     * docker exec -it $(docker ps | grep monolith| awk '{print $1}') sh -c "curl -v -w '\n' http://microservice:3000/"
     * As you can see, these internal communications dont need auth validation --> reduced load on monolith
 
+## Problems it solves 
+1. Can use domain level authorization for *.lcl.host and use it across sub-domains
+2. Has all features in the example application provided and some more
+3. No changes have been made to monolith container
+4. Allows outside requests like async or cron job too.
+5. Optimizes load on monolith container with rejections at nginx and at microservice level
+5. Monolith can talk to microservice without the need for validation
+5. For further reduction of load on monolith, we can also use cache like REDIS that eliminates token validaion from monolith and use it only to generate tokens and sync to redis periodically.
+
+# Limitations
+1. Inter service communications are not secure and a security threat - (can be solved with service mesh)
+2. Monolith can be divided into further smaller containers - DB and DJANGO can be seperated and scaled individually
+3. Can implement token validation at nginx end itself using lua and redis - this eliminates token validation container completely and reduces traffic on all other microservices 
