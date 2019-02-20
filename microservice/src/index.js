@@ -7,6 +7,7 @@ const app = new Koa();
 app.use(authMiddleware);
 
 app.use(async ctx => {
+    console.log("====== TOKEN VALIDATION COMPLETE ======");
     ctx.body = 'Hello World';
 });
 

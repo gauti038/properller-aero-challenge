@@ -49,3 +49,8 @@ Your task is to re-architect the way Lil' Datum Co. handle authentication and au
 You should provide a proof of concept implementation that extends the example implementation and demonstrates some or all of the above. Please provide documentation detailing how your solution works, how to set it up and any assumptions or tradeoffs that were made. A network diagram to help explain your solution will be helpful.
 
 If you have any questions please feel free to contact keat@propelleraero.com.au
+
+
+changes made
+1. adding SESSION_COOKIE_DOMAIN=".lcl.host" line in settings.py to include all domains under *.lcl.host 
+

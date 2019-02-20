@@ -2,10 +2,10 @@ FROM node:10.12.0-alpine
 
 WORKDIR /app
 
-COPY package.json package-lock.json /app/
+#COPY package.json /app/
 
-RUN npm install
+#RUN npm install
 
 COPY . /app/
 
-CMD npm start
+CMD node src/index.js
