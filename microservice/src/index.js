@@ -1,18 +1,15 @@
-const Koa = require('koa');
+const express = require('express')
 const authMiddleware = require('./middleware').authMiddleware;
 
-const app = new Koa();
+const app = express()
 
-// Redirect users to the login page if they don't have a valid auth cookie
 app.use(authMiddleware);
 
-app.use(async ctx => {
-    console.log("====== TOKEN VALIDATION COMPLETE ======");
-    if (ctx.headers.requestsource == 'external'){
-        ctx.body = 'Hello World!. Your authtoken is '+ctx.headers.authtoken;
+app.use((req, res) => {
+    if (req.headers.requestsource == 'external'){
+      res.send('Hello World!. Your authtoken is '+req.headers.authtoken);
     }else{
-        ctx.body = 'Hello World';
+      res.send('Hello World');
     }
-});
-
-app.listen(3000, '0.0.0.0');
+})
+app.listen(3000, () => console.log('Express app listening on 3000'))

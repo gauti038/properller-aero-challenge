@@ -10,8 +10,8 @@
   "author": "",
   "license": "UNLICENSED",
   "dependencies": {
-    "koa": "^2.5.3",
-    "node-fetch": "^2.2.0",
-    "nodemon": "^1.18.9"
+    "express": "^4.16.4",
+    "nodemon": "^1.18.9",
+    "request": "^2.88.0"
   }
 }

@@ -16,6 +16,7 @@
     * git clone https://github.com/gauti038/properller-aero-challenge.git
     * cd properller-aero-challenge
     * docker-compose up --build
+    * Clear your browser cookies --> Very important
 3. Open http://random.lcl.host:5000/ on chrome and enter --> root / password123 
 4. You can try other subdomains without having to login everytime
 4. Copy the authtoken 
@@ -28,8 +29,6 @@
     * Hello World!. Your authtoken is <>
     * This response is from microservice after validating the token with monolith
     * This approach can be used by async or cronJobs to communicate with microservice from outside the environment
-
-** FIX THE BUG **
 
 ## Solution Flow
 
