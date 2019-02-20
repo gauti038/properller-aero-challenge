@@ -25,8 +25,8 @@
     * You will see - "please pass either sessionid cookie or authtoken header"
     * Nginx is responding with this error without even calling microservice, saving load on microservice
 6. From another terminal
-    * curl -w '\n' http://localhost:5000/microservice -H 'authtoken:<paste the token from browser here>'
-    * Hello World!. Your authtoken is <>
+    * curl -w '\n' http://localhost:5000/microservice -H 'authtoken: ^paste the token from browser here^'
+    * Hello World!. Your authtoken is ^some token^
     * This response is from microservice after validating the token with monolith
     * This approach can be used by async or cronJobs to communicate with microservice from outside the environment
 7. For internal communications between containers 
@@ -34,8 +34,8 @@
     * To demonstrate it here - assumed that services are directly speaking over services instead of global load balancer or reverse-proxy
     * Run curl from inside the monolith container to microservice directly
     * docker exec -it $(docker ps | grep monolith| awk '{print $1}') sh -c "curl -v -w '\n' http://microservice:3000/"
-    * replace the data within () with valid monolith docker container id - if you face any issues
-    * docker exec -it <monolithID> sh -c "curl -v -w '\n' http://microservice:3000/"
+    * if you face any issues --> replace the data within () with valid monolith docker container id - 
+    * docker exec -it ^monolithID^ sh -c "curl -w '\n' http://microservice:3000/"
     * The same approach can be used for all other internal communications.
 
 ## Solution Flow
@@ -84,4 +84,4 @@
 # Limitations
 1. Inter service communications are not secure and a security threat - (can be solved with service mesh)
 2. Monolith can be divided into further smaller containers - DB and DJANGO can be seperated and scaled individually
-3. Can implement token validation at nginx end itself using lua and redis - this eliminates token validation container completely and reduces traffic on all other microservices 
+3. Can implement token validation at nginx using lua and redis - this eliminates token validation container completely and reduces traffic on all other microservices 
