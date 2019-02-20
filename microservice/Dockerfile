@@ -8,4 +8,4 @@ WORKDIR /app
 
 COPY . /app/
 
-CMD node src/index.js
+CMD npm start

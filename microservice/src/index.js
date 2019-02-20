@@ -8,7 +8,11 @@ app.use(authMiddleware);
 
 app.use(async ctx => {
     console.log("====== TOKEN VALIDATION COMPLETE ======");
-    ctx.body = 'Hello World';
+    if (ctx.headers.requestsource == 'external'){
+        ctx.body = 'Hello World!. Your authtoken is '+ctx.headers.authtoken;
+    }else{
+        ctx.body = 'Hello World';
+    }
 });
 
 app.listen(3000, '0.0.0.0');
