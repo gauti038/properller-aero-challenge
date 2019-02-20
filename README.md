@@ -1,56 +1,46 @@
-# Propeller Infrastructure Challenge
+# Propeller Aero solutions
 
-This is a high level design task similar to the problems tackled by the Propeller infrastructure team. We want to see how you approach open ended design problems and what you learn from working on them.
-
-## Background
-
-Lil' Datum Co. is a startup that run a microservices architecture that's powered by Kubernetes. Their services perform a wide range of tasks from serving web content to performing datum transformation. Like many companies however, Lil' Datum Co. started with a monolithic architecture and have been slowly breaking parts out of it.
-
-The way things are currently set up, a monolithic Django app handles all authentication and authorisation. After logging in with a username and password or a third party sign in button, users receive a session cookie which gives them persistent access. A reverse proxy is used to allow both the monolith and microservices to be accessed from the same domain. As such, when a user makes a request to a microservice it also receives the cookie. In order to validate that cookie and know which user it is associated with, the service must make a call to the monolith with the cookie every time it receives a request.
-
-The upside of this approach to authentication/authorisation is that it is very easy to implement and leverages the existing capabilities of the monolith. The downsides are that:
-
-- The request to the monolith can be slower than ideal which slows down all requests to the microservices
-- In order to make a request from the monolith to one of the services on behalf of a user, the monolith must create a cookie to send with the request, which the service then must send back to the monolith for validation.
-- The microservice can't make authorized requests to the monolith outside of the context of a user request.
-- Lil' Datum Co. wants to be able to enable single sign on (SSO) across multiple domains and subdomains such as `*.datums.app` and `www.lildatum.co` which is not currently possible with this setup.
-
-### Example implmentation
-Included in this repository is an example implementation of this setup. It consists of a Django monolith, a Koa (NodeJS) microservice and a NGINX reverse proxy. To launch this environment you will need to [install docker](https://docs.docker.com/install/), then inside this repository's root folder, run `docker-compose up`. Navigate to `http://localhost:5000` to start using the environment.
-
-#### The monolith
-This app maintains an SQLite database that contains the user tables and session store. It also exposes a front end and an endpoint for getting the current user through the following routes:
-
-- `/` - The main route. Renders a page with a script that contacts both the monolith and microservice to simulate a single page app. If you are logged out you will be redirected to the login page when accessing this route.
-- `/login/` - The login page. Use the username `root` and password `password123` to login
-- `/logout/` - The logout page. Navigating to this page logs you out.
-- `/api/current_user/` - The current user endpoint. Returns a JSON payload with information about the currently logged in user. Returns a 401 response if you are not logged in.
+## Assumptions 
+1. The monolith part of the system is not to be touched since it is legacy code.
+2. Can tweak and make changes in micorservice. (well thats the point of micorservice)
+3. Solve the problem of login throughout the domain (**.lcl.host is considered as the domain for the application)
+4. Microservices talk to each other internally using service layers (either docker compose or kubernetes services)
+5. All forms of authentication follow either cookies (for browsers) or headers (SSO/OAuth) based approach
+6. Reverse proxy is the only way for external sources to interact with containers. (Containers are not exposed without nginx)
+7. Optimise communications between containers and allow for async or cron jobs between containers
 
 
-#### The microservice
-Returns `Hello World` if it can verify that you are logged in, otherwise it returns a 401 response.
+## Solution Flow
 
-#### The reverse proxy
-Routes all requests to the monolith except those that start with `/microservice`. All front end requests should be made through this reverse proxy which can be accessed at `http://localhost:5000`.
+### login 
+1. First time user opens http://domain.lcl.host:5000/ , gets to login page
+2. After entering username and password --> nginx redirects --> monolith 
+3. Monolith validates and responds with cookies
+4. nginx returns this response and adds a domain name for cookie as .lcl.host
+5. This reuses the same cookie across the domain of .lcl.host 
+5. Can try other subdomains - http://asdf.lcl.host:5000/ or http://propeller.lcl.host:5000/ 
 
-To simulate accessing the services from a different domain you can also use the address `http://datumco.lcl.host:5000`. You will notice that changing domain requires you to log in again.
+### microservie 
+1. There are 2 ways to access microservice - 1. Browser , 2. REST API 
+2. For Browser - 
+    * browser must have a cookie by name session id, else nginx rejects it and 401 (unauthorized)
+    * nginx converts value of this cookie as authtoken header value
+    * forwards it to microservice service
+3. For REST APIs - 
+    * The sender must send an authtoken as header, else nginx rejects and retuns 401 (unauthorized)
+    * nginx forwards it to microservice
+    * this approach can also be used by async or cron jobs by making REST calls
+4. At microservice -
+    * It always reads the authtoken header. if no header --> throw 401 (unauthorized)
+    * If token exists validate with monolith service 
+    * This check filters many requets thereby reducing load on monolith 
 
-## The task
-
-Your task is to re-architect the way Lil' Datum Co. handle authentication and authorisation to overcome the problems outlined above. Your solution should allow for:
-
-- Logging in with a username/password
-- Logging in with a third party (e.g google) via OAuth and/or SAML
-- SSO across domains and subdomains
-- Efficient checking of request authorisation for both the microservcies and the monolith
-- Efficient interservice communication with the ability to easily impersonate a user from either the monolith or the microservice
-- The ability to communicate between services outside the context of a request. e.g. from an asynchronous worker or cron job
-
-You should provide a proof of concept implementation that extends the example implementation and demonstrates some or all of the above. Please provide documentation detailing how your solution works, how to set it up and any assumptions or tradeoffs that were made. A network diagram to help explain your solution will be helpful.
-
-If you have any questions please feel free to contact keat@propelleraero.com.au
-
-
-changes made
-1. adding SESSION_COOKIE_DOMAIN=".lcl.host" line in settings.py to include all domains under *.lcl.host 
+### Internal Communications 
+1. Always uses service names instead of nginx / host urls 
+2. No need to pass any authtoken or cookie 
+3. Since these communications are always internal and thereby DONOT need authentication
+4. Also because these service are not exposed outside - no external source can directly call these services without nginx
+5. RUN this command on the host
+    * docker exec -it $(docker ps | grep monolith| awk '{print $1}') sh -c "curl -v -w '\n' http://microservice:3000/"
+    * As you can see, these internal communications dont need auth validation --> reduced load on monolith
 
