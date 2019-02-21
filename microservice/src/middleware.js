@@ -1,16 +1,14 @@
-const request = require('request');
-
+const redis = require('redis');
 const NOT_AUTHORIZED = 401;
-const AUTH_VERIFIER = 'http://monolith:8000/api/current_user/';
+
+const client = redis.createClient({
+    port      : 6379,               
+    host      : 'redis',
+});
 
 const authMiddleware = (req, res, next) => {
-    const requestsource = req.headers.requestsource;
-    if (requestsource != "external"){
-        console.log("skipping token validation, since request is from internal source");
-        return next();
-    }
     const authtoken = req.headers.authtoken;
-    console.log("validating token with monolith auth ", authtoken);
+    console.log("validating token with redis ", authtoken);
 
     if (!authtoken) {
         res.status(NOT_AUTHORIZED);
@@ -18,17 +16,16 @@ const authMiddleware = (req, res, next) => {
         return;
     }
 
-    var options = {
-        uri: AUTH_VERIFIER,
-        headers: { cookie: "csrftoken=VWegI; sessionid="+authtoken }
-    }
-    request(options, function(err, resp){
+    console.log("calling redis...")
+    client.get("sessionid", function(err, reply) {
         if(err){
             res.status(NOT_AUTHORIZED);
             res.send("Unable to verify token");
             return;
         }
-        if(resp.body != ''){
+        var sessionid = reply.split("###")[1];
+        if(sessionid == authtoken){
+            console.log("token valid")
             next();
         }else{
             res.status(NOT_AUTHORIZED);
@@ -36,6 +33,7 @@ const authMiddleware = (req, res, next) => {
             return;
         }
     });
+
   }
 
 module.exports = {

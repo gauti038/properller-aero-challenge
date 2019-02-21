@@ -8,6 +8,6 @@ RUN pip install -r requirements.txt
 
 COPY . /app/
 
-RUN apk add curl
+# RUN apk add curl
 
 CMD ./manage.py runserver 0.0.0.0:8000

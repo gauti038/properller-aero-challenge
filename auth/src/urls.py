@@ -18,6 +18,7 @@ from .views import current_user, main_view
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
+from django.core.cache import cache
 
 urlpatterns = [
     path('', main_view),

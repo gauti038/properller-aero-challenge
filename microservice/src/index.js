@@ -1,15 +1,15 @@
 const express = require('express')
-const authMiddleware = require('./middleware').authMiddleware;
+const Auth = require('./middleware');
 
-const app = express()
+const app = express();
 
-app.use(authMiddleware);
 
-app.use((req, res) => {
-    if (req.headers.requestsource == 'external'){
-      res.send('Hello World!. Your authtoken is '+req.headers.authtoken);
-    }else{
-      res.send('Hello World');
-    }
-})
+app.get('/microservice', Auth.authMiddleware, function(req, res) {
+    res.send('Hello World!. Your authtoken is '+req.headers.authtoken);
+});
+
+// app.post('/setToken', function(req, res){
+  
+// });
+
 app.listen(3000, () => console.log('Express app listening on 3000'))

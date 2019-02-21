@@ -1,12 +1,12 @@
 version: '3.2'
 
 services:
-  monolith:
-    build: monolith
+  auth:
+    build: auth
     ports:
       - 8000:8000
     volumes:
-      - ./monolith:/app
+      - ./auth:/app
   microservice:
     build: microservice
     ports:
@@ -19,6 +19,12 @@ services:
       - 5000:5000
     volumes:
       - ./reverse-proxy/nginx.conf:/etc/nginx/nginx.conf
+  redis:
+    build: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis:/data
   # scope:
   #   image: weaveworks/scope:1.10.2
   #   network_mode: "host"

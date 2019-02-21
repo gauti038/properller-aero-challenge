@@ -1,11 +1,14 @@
 from django.http import JsonResponse, HttpResponse
 from django.template.response import TemplateResponse
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 
 MICROSERVICE_ENDPOINT = 'http://microservice:3000/'
 
 @login_required
 def main_view(request):
+    sid = "###"+ str(request.COOKIES['sessionid']) + "###"
+    cache.set('sessionid',sid )
     return TemplateResponse(request, 'main.html')
 
 
