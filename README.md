@@ -39,6 +39,7 @@
     * In kubernetes environment we can use service mesh like Istio, which handles most concerns
     * To demonstrate it here - assumed that services are directly speaking over services instead of global load balancer or reverse-proxy
     * Run curl from inside the auth container to microservice directly
+    * docker exec -it $(docker ps | grep auth| awk '{print $1}') sh -c "apk add curl"
     * docker exec -it $(docker ps | grep auth| awk '{print $1}') sh -c "curl -v -w '\n' http://microservice:3000/  -H 'authtoken:`paste the auth token`'"
     * if you face any issues --> replace the data within () with valid auth docker container id - 
     * docker exec -it ^auth container ID^ sh -c "curl -w '\n' http://microservice:3000/ -H 'authtoken:`paste the token`'"
