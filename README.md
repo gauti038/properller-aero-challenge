@@ -40,9 +40,9 @@
     * To demonstrate it here - assumed that services are directly speaking over services instead of global load balancer or reverse-proxy
     * Run curl from inside the auth container to microservice directly
     * docker exec -it $(docker ps | grep auth| awk '{print $1}') sh -c "apk add curl"
-    * docker exec -it $(docker ps | grep auth| awk '{print $1}') sh -c "curl -v -w '\n' http://microservice:3000/  -H 'authtoken:`paste the auth token`'"
+    * docker exec -it $(docker ps | grep auth| awk '{print $1}') sh -c "curl -v -w '\n' http://microservice:3000/microservice  -H 'authtoken:`paste the auth token`'"
     * if you face any issues --> replace the data within () with valid auth docker container id - 
-    * docker exec -it ^auth container ID^ sh -c "curl -w '\n' http://microservice:3000/ -H 'authtoken:`paste the token`'"
+    * docker exec -it ^auth container ID^ sh -c "curl -w '\n' http://microservice:3000/microservice -H 'authtoken:`paste the token`'"
     * The same approach can be used for all other internal communications.
 
 ## Solution Flow
@@ -80,7 +80,7 @@
 5. Since these communications are always internal and the traffic never goes to nginx
 6. Also because these service are not exposed outside - no external source can directly call these services without nginx
 7. RUN this command on the host
-    * docker exec -it $(docker ps | grep auth| awk '{print $1}') sh -c "curl -v -w '\n' http://microservice:3000/ -H 'authtoken:`paste the token`'"
+    * docker exec -it $(docker ps | grep auth| awk '{print $1}') sh -c "curl -v -w '\n' http://microservice:3000/microservice -H 'authtoken:`paste the token`'"
     * As you can see, these internal communications are now secure and optimized
 
 ## Problems it solves 
