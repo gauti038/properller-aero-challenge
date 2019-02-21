@@ -1,5 +1,10 @@
 # Propeller Aero solutions
 
+## Architecture diagram
+![Screenshot](images/1.jpg)
+![Screenshot](images/2.jpg)
+![Screenshot](images/3.jpg)
+
 ## Assumptions 
 1. Optimize and redesign auth part of the application
 2. Solve the problem of login throughout the domain (**.lcl.host is considered as the domain for the application)
